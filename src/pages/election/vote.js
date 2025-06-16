@@ -1,19 +1,21 @@
 import Header from "../../components/ui/header"
 import NavBar from "../../components/ui/navBar"
 
-import React, { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { getContract } from '../../utils/contract';
-import Swal from "sweetalert2";
+import React, { useEffect, useState } from 'react'
+import { Link, useParams } from 'react-router-dom'
+import { getContract } from '../../utils/contract'
+import Swal from "sweetalert2"
+import Cookies from "js-cookie"
+import { jwtDecode } from "jwt-decode"
 
 const Vote = () => {
     const { id: electionId } = useParams();
     const [electionInfo, setElectionInfo] = useState(null);
     const [candidates, setCandidates] = useState([]);
     const [selectedId, setSelectedId] = useState(null);
-    const [cccd, setCCCD] = useState('');
     const [loading, setLoading] = useState(true);
-
+    const token = Cookies.get('token')
+    const decoded = jwtDecode(token);
     useEffect(() => {
         const fetchElection = async () => {
             try {
@@ -45,16 +47,17 @@ const Vote = () => {
     }, [electionId]);
 
     const handleVote = async () => {
-        if (!cccd || selectedId === null) {
+        if (selectedId === null) {
             return Swal.fire({
-                text: "Vui lòng nhập CCCD và chọn ứng viên!",
+                text: "Vui lòng chọn ứng viên!",
                 icon: "error"
             })
         }
 
         try {
+            const cccd = decoded.nationalId
             const contract = await getContract();
-            const tx = await contract.vote(Number(electionId), selectedId, cccd);
+            const tx = await contract.vote(Number(electionId), selectedId, cccd.toString());
             await tx.wait();
             Swal.fire({
                 text: "Bầu cử thành công!",
@@ -68,7 +71,7 @@ const Vote = () => {
             });
         }
     };
-    const vote = ()=>{
+    const vote = () => {
         Swal.fire({
             title: "Bạn chắc chắn ?",
             text: "Sẽ không thể thay đổi phiếu bầu!",
@@ -79,7 +82,7 @@ const Vote = () => {
             confirmButtonText: "Đúng!"
         }).then((result) => {
             if (result.isConfirmed) {
-               handleVote()
+                handleVote()
             }
         });
     }
@@ -105,16 +108,6 @@ const Vote = () => {
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div className="row">
-                        <label className="block mb-2 font-semibold">Nhập CCCD:</label>
-                        <input
-                            type="text"
-                            className="border w-full mb-4 p-2"
-                            value={cccd}
-                            onChange={(e) => setCCCD(e.target.value)}
-                            placeholder="CCCD của bạn"
-                        />
                     </div>
                     <div className="col-md-12 col-xl-12">
                         <h5 className="mb-3">Danh sách cuộc bầu cử</h5>
@@ -143,11 +136,11 @@ const Vote = () => {
                                                     </td>
                                                 </tr>
                                             ))}
-                                            <button className="bg-green-600 text-white px-4 py-2 mt-4 rounded" onClick={vote}>
-                                                Gửi phiếu bầu
-                                            </button>
                                         </tbody>
                                     </table>
+                                    <button className="btn-primary btn text-white px-4 py-2 mt-4 rounded" onClick={vote}>
+                                        Gửi phiếu bầu
+                                    </button>
                                 </div>
                             </div>
                         </div>

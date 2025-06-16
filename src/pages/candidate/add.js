@@ -91,7 +91,7 @@ const AddCandidate = () => {
                                                         <td>{user.firstName + " " + user.lastName}</td>
                                                         <td>
                                                             <button
-                                                                className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                                                                className="btn btn-primary"
                                                                 onClick={() => handleAddCandidate(`${user.firstName} ${user.lastName}`)}
                                                             >
                                                                 Thêm vào bầu cử
